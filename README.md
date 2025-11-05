@@ -10,6 +10,20 @@ npm install dynaloader
 
 ## Usage
 
+### Without Build Tools
+
+If you're not using a build tool (like Vite, Webpack, or Rollup), you'll need to include an importmap in your HTML to enable loading the dynaloader scripts:
+
+```html
+<script type="importmap">
+    {
+        "imports": {
+            "dynaloader": "./node_modules/dynaloader/asset-loader.js"
+        }
+    }
+</script>
+```
+
 ### As a Module
 
 Import the asset loader in your JavaScript:
