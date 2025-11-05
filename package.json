@@ -1,6 +1,6 @@
 {
     "name": "dynaloader",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Generic asset loader for dynamically loading assets based on site-assets.json configuration",
     "type": "module",
     "main": "./asset-loader.js",
@@ -10,11 +10,13 @@
     },
     "bin": {
         "add-asset": "./add-asset.js",
-        "generate-schema": "./generate-schema.js"
+        "generate-schema": "./generate-schema.js",
+        "init": "./init.js"
     },
     "scripts": {
         "add-asset": "node add-asset.js",
-        "generate-schema": "node generate-schema.js"
+        "generate-schema": "node generate-schema.js",
+        "init": "node init.js"
     },
     "keywords": [
         "asset-loader",
@@ -32,6 +34,7 @@
         "asset-loader.js",
         "add-asset.js",
         "generate-schema.js",
+        "init.js",
         "README.md"
     ]
 }
