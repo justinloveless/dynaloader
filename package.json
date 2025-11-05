@@ -1,0 +1,37 @@
+{
+    "name": "dynaloader",
+    "version": "1.0.0",
+    "description": "Generic asset loader for dynamically loading assets based on site-assets.json configuration",
+    "type": "module",
+    "main": "./asset-loader.js",
+    "exports": {
+        ".": "./asset-loader.js",
+        "./loader": "./asset-loader.js"
+    },
+    "bin": {
+        "add-asset": "./add-asset.js",
+        "generate-schema": "./generate-schema.js"
+    },
+    "scripts": {
+        "add-asset": "node add-asset.js",
+        "generate-schema": "node generate-schema.js"
+    },
+    "keywords": [
+        "asset-loader",
+        "static-site",
+        "json",
+        "content-management",
+        "dynamic-loading"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "inquirer": "^8.2.5"
+    },
+    "files": [
+        "asset-loader.js",
+        "add-asset.js",
+        "generate-schema.js",
+        "README.md"
+    ]
+}
