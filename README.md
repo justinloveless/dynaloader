@@ -1,11 +1,11 @@
-# dynamic-asset-loader
+# dynaloader
 
 Generic asset loader for dynamically loading assets based on `site-assets.json` configuration. Provides dynamic content loading for static sites with CLI tools for asset management.
 
 ## Installation
 
 ```bash
-npm install dynamic-asset-loader
+npm install dynaloader
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ npm install dynamic-asset-loader
 Import the asset loader in your JavaScript:
 
 ```javascript
-import { loadSiteAssets, getContentData } from 'dynamic-asset-loader';
+import { loadSiteAssets, getContentData } from 'dynaloader';
 
 // Load all assets and execute handlers
 await loadSiteAssets('site-assets.json', () => {
