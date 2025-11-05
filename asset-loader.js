@@ -95,46 +95,78 @@ async function loadComboAssets(asset) {
         });
     });
 
-    // Fetch directory listing by trying to load files
-    // Since we can't list directory contents in a browser, we need to scan for known files
-    // This is a limitation - in practice, files should be explicitly listed or discovered via API
-    // For now, we'll try to discover files by attempting to load them
+    let files = [];
 
-    // Alternative: Build file list from actual filesystem for static sites
-    // We'll use a simple approach: try fetching all combinations
-
-    // Since we can't list directories in browser, we'll use a different approach:
-    // Attempt to fetch files and group by basename
-    const response = await fetch(dirPath);
-    if (!response.ok) {
-        console.warn(`Could not access directory: ${dirPath}`);
-        return comboData;
-    }
-
-    // Parse HTML directory listing (if available) or use a manifest
-    // For now, we'll use a workaround: try to fetch known patterns
-
-    // Better approach: scan for files by reading directory metadata
-    // Since browser can't list directories, we need to be creative
-    // Let's fetch the directory as HTML and parse it
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const links = doc.querySelectorAll('a');
-
-    const files = [];
-    links.forEach(link => {
-        const href = link.getAttribute('href');
-        if (href && !href.startsWith('..') && !href.endsWith('/')) {
-            // Extract just the filename from the href (remove any path components)
-            const filename = href.split('/').pop();
-            // Check if file has an allowed extension
-            const ext = filename.substring(filename.lastIndexOf('.'));
-            if (extensionMap[ext]) {
-                files.push(filename);
+    // Priority 1: Check for manifest.json in the directory
+    try {
+        const manifestResponse = await fetch(`${dirPath}/manifest.json`);
+        if (manifestResponse.ok) {
+            const manifest = await manifestResponse.json();
+            if (manifest.files && Array.isArray(manifest.files)) {
+                files = manifest.files.filter(filename => {
+                    const ext = filename.substring(filename.lastIndexOf('.'));
+                    return extensionMap[ext];
+                });
+                console.log(`Loaded ${files.length} files from ${dirPath}/manifest.json`);
             }
         }
-    });
+    } catch (error) {
+        // Manifest not found, continue to fallbacks
+    }
+
+    // Priority 2: Check if files are explicitly listed in the asset configuration
+    if (files.length === 0 && asset.files && Array.isArray(asset.files)) {
+        // Use the explicit file list from configuration
+        files = asset.files.filter(filename => {
+            const ext = filename.substring(filename.lastIndexOf('.'));
+            return extensionMap[ext];
+        });
+        console.log(`Loaded ${files.length} files from site-assets.json configuration`);
+    }
+
+    // Priority 3: Fall back to trying to fetch directory listing
+    if (files.length === 0) {
+        // Since we can't list directory contents in a browser, we need to scan for known files
+        // This only works if the server has directory listing enabled
+        try {
+            const response = await fetch(dirPath);
+            if (response.ok) {
+                // Parse HTML directory listing (if available)
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a');
+
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith('..') && !href.endsWith('/')) {
+                        // Extract just the filename from the href (remove any path components)
+                        const filename = href.split('/').pop();
+                        // Check if file has an allowed extension
+                        const ext = filename.substring(filename.lastIndexOf('.'));
+                        if (extensionMap[ext]) {
+                            files.push(filename);
+                        }
+                    }
+                });
+                if (files.length > 0) {
+                    console.log(`Loaded ${files.length} files from directory listing: ${dirPath}`);
+                }
+            }
+        } catch (error) {
+            // Directory listing failed
+        }
+    }
+
+    // If no files found by any method, warn the user
+    if (files.length === 0) {
+        console.warn(`Could not load files from directory: ${dirPath}`);
+        console.warn(`Solutions:`);
+        console.warn(`  1. Create ${dirPath}/manifest.json with a "files" array (recommended for CMS)`);
+        console.warn(`  2. Add a "files" array to this asset in site-assets.json`);
+        console.warn(`  3. Enable directory listing on your web server`);
+        return comboData;
+    }
 
     // Group files by base name
     const fileGroups = {};
